@@ -9,7 +9,7 @@ const res = require('express/lib/response');
 
 // 
 app.use(cors())
-app.use(express())
+app.use(express.json())
 // 
 
 
@@ -60,46 +60,30 @@ async function run(){
 
 
 
+// products update
 
-
-      // app.post('/update/:id' , async(req,res)=> {
-      //   console.log("ffgffg");
-      //   const id = req.params.id
-			// const query = { _id: ObjectId(id) }
-      // console.log(query);
-      // console.log(req.body);
-			// const options = { upsert: true }
-			// const product = await collection.findOne(query)
-			// const updatedDoc = {
-			// 	$set: {
-			// 		...product,
-			// 		quantity: +product.quantity,
-			// 	},
-			// }
-      // console.log(updatedDoc + "aaaaa");
-			// const result = await collection.updateOne(
-			// 	query,
-			// 	updatedDoc,
-			// 	options
-			// )
-			// res.send(result)
-      // } )
+      app.post('/update/:id' , async(req,res)=> {
+        console.log("ffgffg");
+        const id = req.params.id
+			const query = { _id: ObjectId(id)}
+     const plus = req.body.quantity
+     console.log(plus);
+			const options = { upsert: true }
+			const product = await collection.findOne(query)
+      console.log(product);
+      const updatedDoc = {$set:{...product, quantity: +product.quantity + plus}}
+			const result = await collection.updateOne(
+				query,
+				updatedDoc,
+				options
+			)
+			res.send(result)
+      } )
 
 
 
-    app.put('/update/:id' , (req,re)=> {
-      const id = req.params.id;
-      const products  = req.body;
-      const query = {_id: ObjectId(id)}
-      const updateproducts = await collection.updateOne(query,{
-        $set:products
-      })
-      res.send(updateproducts)
-    } )
-
-
-
-
+   
+     
   }
 
   finally{
