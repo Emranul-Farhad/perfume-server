@@ -6,6 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 var cors = require('cors');
 const res = require('express/lib/response');
+const decode = require('jsonwebtoken/decode');
 
 
 // 
@@ -16,10 +17,34 @@ app.use(express.json())
 
 // jwt verify
 
-function jwtverify(req,res,next){
+// function jwtverify(req,res,next){
+//   const header = req.headers.authorization
+//   if(!header){
+//     return res.status(401).send({message: "unauthorized access"})
+//   }
   
-}
+//   next()
 
+// }
+
+
+
+function jwtverifys(req, res, next){
+  const tokenheader = req.headers.authorization;
+  if(!tokenheader){
+    return res.status(401).send({message : "unauthorized access"})
+  }
+  const splitoken = tokenheader.split(' ')[1]
+  jwt.verify(splitoken, process.env.ACCESS_TOKEN , (err, decoded) => {
+    if(err){
+      return res.status(403).send({message: "fobidden access"})
+    }
+    console.log(decoded);
+    req.decoded = decoded
+  } )
+
+  next()
+}
 
 // mongo db connection 
 
@@ -43,26 +68,32 @@ async function run() {
      })
       
 
-// products crud
-    app.get('/products', async (req, res) => {
+
+    app.get('/products',  async (req, res) => {
       const query = {}
-      const cursor = collection.find(query).limit(6)
-      const result = await cursor.toArray()
-      res.send(result)
-    })
-
-
-    app.get('/product', async (req, res) => {
-      const header = req.headers.authorization
-      console.log(header);
-      const email = req.query.email;
-      const query = {email:email}
-      console.log(query);
       const cursor = collection.find(query)
       const result = await cursor.toArray()
       res.send(result)
     })
 
+
+    app.get('/myitem', jwtverifys, async(req, res) => {
+      const decodemial = req.decoded.Email
+       const email = req.query.email;
+       if(decodemial === email){
+        const query = {email:email}
+        const cursor = collection.find(query)
+        const result = await cursor.toArray()
+        res.send(result)
+       }
+       else{
+         res.status(403).send({message : 'forviden'})
+       }
+      
+       
+     
+    
+    })
 
 
     app.post('/product', async (req, res) => {
@@ -83,7 +114,6 @@ async function run() {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const product = await collection.findOne(query)
-
       const option = { upsert: true }
       const updated = { $set: { ...product, quantity: +product.quantity - 1 } }
       const result = await collection.updateOne(query, updated, option)
@@ -98,10 +128,8 @@ async function run() {
       const id = req.params.id
       const query = { _id: ObjectId(id) }
       const plus = req.body.quantity
-
       const options = { upsert: true }
       const product = await collection.findOne(query)
-
       const updatedDoc = { $set: { ...product, quantity: +product.quantity + plus } }
       const result = await collection.updateOne(
         query,
@@ -147,7 +175,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send('Hello ')
+  res.send('fashions Time')
 })
 
 app.listen(port, () => {
