@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+var jwt = require('jsonwebtoken');
 const port = process.env.PORT || 8000
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
@@ -12,6 +13,12 @@ app.use(cors())
 app.use(express.json())
 // 
 
+
+// jwt verify
+
+function jwtverify(req,res,next){
+  
+}
 
 
 // mongo db connection 
@@ -26,6 +33,17 @@ async function run() {
     await client.connect()
     const collection = client.db("perfume").collection("products");
 
+// jwt
+     app.post('/login' ,async(req,res) => {
+       const users = req.body;
+       const accessToken = jwt.sign(users, process.env.ACCESS_TOKEN,{
+         expiresIn : '6d'
+       })
+       res.send({accessToken});
+     })
+      
+
+// products crud
     app.get('/products', async (req, res) => {
       const query = {}
       const cursor = collection.find(query).limit(6)
@@ -35,11 +53,16 @@ async function run() {
 
 
     app.get('/product', async (req, res) => {
-      const query = {}
+      const header = req.headers.authorization
+      console.log(header);
+      const email = req.query.email;
+      const query = {email:email}
+      console.log(query);
       const cursor = collection.find(query)
       const result = await cursor.toArray()
       res.send(result)
     })
+
 
 
     app.post('/product', async (req, res) => {
@@ -47,6 +70,7 @@ async function run() {
       const result = await collection.insertOne(id)
       res.send(result)
     })
+
 
     app.get('/product/:id', async (req, res) => {
       const id = req.params.id;
@@ -123,7 +147,7 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-  res.send('Hello Worlaaad!')
+  res.send('Hello ')
 })
 
 app.listen(port, () => {
