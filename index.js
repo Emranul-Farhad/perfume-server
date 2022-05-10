@@ -15,17 +15,6 @@ app.use(express.json())
 // 
 
 
-// jwt verify
-
-// function jwtverify(req,res,next){
-//   const header = req.headers.authorization
-//   if(!header){
-//     return res.status(401).send({message: "unauthorized access"})
-//   }
-  
-//   next()
-
-// }
 
 
 
@@ -41,9 +30,10 @@ function jwtverifys(req, res, next){
     }
     console.log(decoded);
     req.decoded = decoded
+    next()
   } )
 
-  next()
+  
 }
 
 // mongo db connection 
