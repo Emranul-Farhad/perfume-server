@@ -168,6 +168,10 @@ app.get('/', (req, res) => {
   res.send('fashions Time')
 })
 
+app.get('/fashion' , (req,res) => {
+  res.send('fasion connected')
+} )
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })
